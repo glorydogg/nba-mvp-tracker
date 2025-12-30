@@ -40,6 +40,8 @@ class NBAClient:
                 df = stats.get_data_frames()[0]
 
                 logger.info(f"Succesfully  retrieved data on attempt {i + 1}\n")
+                if df is None:
+                    return
                 return df
             except Exception as e:
                 logger.warning(f"Attempt {i + 1} failed Retrying...")
