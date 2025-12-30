@@ -31,10 +31,12 @@ class NBAClient:
             try:
                 stats = LeagueDashPlayerStats(
                     season=self.season,
-                    league_id_nullable='00',             
+                    league_id_nullable='00',
                     measure_type_detailed_defense='Base',
-                    per_mode_detailed='PerGame',   # This will actually give you PPG/RPG directly!
-                    timeout=59)
+                    per_mode_detailed='PerGame',
+                    headers=self.headers, # Key fix
+                    timeout=100)
+                
                 df = stats.get_data_frames()[0]
 
                 logger.info(f"Succesfully  retrieved data on attempt {i + 1}\n")
