@@ -4,6 +4,7 @@ from data_processing.cleaning import cleaning_player_stats
 from models.mvp_scoring import compute_mvp_score 
 from models.mvp_scoring import stat_contributions
 from utils.mvp_bar_chart import plot_mvp_bar_chart
+from utils.db import create_table, insert_player
 from utils.io_utils import NBALogger 
 from utils.aws_uploader import S3Uploader
 
@@ -14,7 +15,9 @@ logging.basicConfig(
 )
 
 def run_pipline():
+    create_table()
     
+
     client = NBAClient("2025-26")
     raw_df = client.get_all_player_stats()
 
@@ -25,11 +28,18 @@ def run_pipline():
     final_df["MVP_SCORE"] = final_df["MVP_SCORE"].round(2)
     
     print(final_df.head(10))
-    plot_mvp_bar_chart(final_df)
+    #plot_mvp_bar_chart(final_df)
 
    
     mvp_log = NBALogger()
     mvp_log.log_top_ten(ranked_df)
+    
+    for _, row in final_df.head(10).iterrows():
+        name = row["PLAYER_NAME"]
+        score = row["MVP_SCORE"]
+        
+        insert_player(name, score)
+        
 
     uploader = S3Uploader()
     uploader.upload("data/top_ten_mvp.csv", "rankings/top_ten_mvp.csv")

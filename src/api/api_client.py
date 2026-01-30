@@ -34,7 +34,7 @@ class NBAClient:
                     league_id_nullable='00',
                     measure_type_detailed_defense='Base',
                     per_mode_detailed='PerGame',
-                    headers=self.headers, # Key fix
+                    headers=self.headers, 
                     timeout=100)
                 
                 df = stats.get_data_frames()[0]
