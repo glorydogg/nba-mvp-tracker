@@ -1,5 +1,6 @@
 import logging
 import datetime
+import uuid
 from api.api_client import NBAClient
 from data_processing.cleaning import cleaning_player_stats
 from models.mvp_scoring import compute_mvp_score 
@@ -17,6 +18,7 @@ logging.basicConfig(
 
 def run_pipline():
     create_table()
+    run_id = str(uuid.uuid4())
     
 
     client = NBAClient("2025-26")
@@ -36,12 +38,16 @@ def run_pipline():
     mvp_log.log_top_ten(ranked_df)
     
     date = datetime.datetime.today()
+    print("INSERTING TOP 10 WITH RUN_DATE: ", date)
     for _, row in final_df.head(10).iterrows():
+
         name = row["PLAYER_NAME"]
         score = row["MVP_SCORE"]
         run_date = date
         
-        insert_player(name, score, run_date)
+        print("Inserting: ", name, score)
+        insert_player(run_id, name, score, run_date)
+    
         
 
     uploader = S3Uploader()

@@ -13,6 +13,7 @@ def create_table():
     cur.execute("""
     CREATE TABLE IF NOT EXISTS mvp_rankings (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        run_id,
         player_name TEXT,
         mvp_score REAL,
         run_date
@@ -23,14 +24,14 @@ def create_table():
     conn.commit()
     conn.close()
 
-def insert_player(name, score, date):
+def insert_player(run_id, name, score, date):
     conn = get_connection()
     cur = conn.cursor()
 
     cur.execute("""
-    INSERT INTO mvp_rankings (player_name, mvp_score, run_date)
-    VALUES (?, ?, ?)
-    """, (name, score, date))
+    INSERT INTO mvp_rankings (run_id, player_name, mvp_score, run_date)
+    VALUES (?, ?, ?, ?)
+    """, (run_id, name, score, date))
 
     conn.commit()
     conn.close()
