@@ -39,7 +39,7 @@ def run_pipline():
     
     date = datetime.datetime.today()
     print("INSERTING TOP 10 WITH RUN_DATE: ", date)
-    for _, row in final_df.head(10).iterrows():
+    for rank, (_, row) in enumerate(final_df.head(10).iterrows(), start=1):
 
         name = row["PLAYER_NAME"]
         score = row["MVP_SCORE"]
