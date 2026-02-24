@@ -2,20 +2,28 @@ name: NBA MVP Tracker Automation
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Midnight UTC
-  workflow_dispatch:      # This adds the manual "Run" button
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest  # Changed from windows-latest for speed/stability
+    timeout-minutes: 10     # Stops the job if it hangs too long
+    
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4 # Updated to v4
+      
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5 # Updated to v5
         with:
           python-version: '3.12'
+          cache: 'pip' # Automatically caches your dependencies for faster future runs
+
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
       - name: Run Tracker
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

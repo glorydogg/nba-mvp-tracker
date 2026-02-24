@@ -10,7 +10,7 @@ WEIGHTS = {
 }
 
 
-def normalize(df, columns):
+def normalize(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     # adding z scores
     for col in columns:
         mean = df[col].mean()
@@ -24,7 +24,7 @@ def normalize(df, columns):
 
     return df
 
-def compute_mvp_score(df):
+def compute_mvp_score(df: pd.DataFrame) -> pd.DataFrame:
     stats_to_normalize = ["PPG", "TS_PCT", "W_PCT", "PLUS_MINUS", "APG", "RPG"]
     df = normalize(df, stats_to_normalize)
     df["MVP_SCORE"] = (
@@ -43,7 +43,7 @@ def compute_mvp_score(df):
     return df
 
 
-def stat_contributions(df):
+def stat_contributions(df: pd.DataFrame) -> pd.DataFrame:
     for stat, weight in WEIGHTS.items():
         z_col = f"Z_{stat}"
         contrib_col = f"{stat}_C"
