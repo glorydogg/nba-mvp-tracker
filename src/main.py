@@ -24,7 +24,7 @@ def run_pipline():
     client = NBAClient("2025-26")
     raw_df = client.get_all_player_stats()
 
-    if raw_df is None or raw_df.empty():
+    if raw_df is None or raw_df.empty:
         print("Api returned no data. Pipeline stopped.")
         return
 
