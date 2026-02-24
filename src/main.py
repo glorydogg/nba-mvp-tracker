@@ -24,6 +24,10 @@ def run_pipline():
     client = NBAClient("2025-26")
     raw_df = client.get_all_player_stats()
 
+    if raw_df is None or raw_df.empty():
+        print("Api returned no data. Pipeline stopped.")
+        return
+
     clean_df = cleaning_player_stats(raw_df)
 
     ranked_df = compute_mvp_score(clean_df)
