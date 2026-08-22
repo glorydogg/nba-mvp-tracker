@@ -4,9 +4,9 @@ import psycopg2
 DB_PARAMS = {
     "dbname": "nba_mvp_db",
     "user": "postgres",
-    "password": "mysecretpassword",
-    "host": "localhost",
-    "port": "5432"
+    "password": "postgres",
+    "host": "127.0.0.1",
+    "port": "5433" 
 }
 
 def get_connection():
@@ -46,3 +46,15 @@ def insert_player(run_id, name, score, date):
     conn.commit()
     cur.close()
     conn.close()
+
+
+
+
+if __name__ == "__main__":
+    print("Creating table...")
+    create_table()
+    print("Table created successfully!")
+
+    print("Inserting test record...")
+    insert_player("run_001", "Nikola Jokic", 98.5, "2026-08-21")
+    print("Record inserted successfully!")
