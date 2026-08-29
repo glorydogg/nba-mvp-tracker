@@ -35,19 +35,21 @@ def create_table():
     conn.close()
 
 
-def insert_player(run_id, name, score, pts, reb, ast, date):
+def insert_players_batch(players_data):
+    """
+    Inserts a list of player tuples in a single database round-trip.
+    players_data format: [(run_id, name, score, date), ...]
+    """
     conn = get_connection()
     cur = conn.cursor()
 
-    # Uses standard %s placeholders for parameter binding
     insert_query = """
-    INSERT INTO MVP_RANKINGS (RUN_ID, PLAYER_NAME, MVP_SCORE, PTS, REB, AST, RUN_DATE)
-    VALUES (%s, %s, %s, %s, %s, %s, %s)
+    INSERT INTO NBA_MVP_DB.PUBLIC.MVP_RANKINGS (RUN_ID, PLAYER_NAME, MVP_SCORE, RUN_DATE)
+    VALUES (%s, %s, %s, %s)
     """
     
-    cur.execute(insert_query, (run_id, name, score, pts, reb, ast, date))
-
-    
+    cur.executemany(insert_query, players_data)
+    conn.commit()
     cur.close()
     conn.close()
 
