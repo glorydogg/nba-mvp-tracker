@@ -1,60 +1,62 @@
-import psycopg2
+import snowflake.connector
 
-# Configure database credentials matching your Docker container
-DB_PARAMS = {
-    "dbname": "nba_mvp_db",
-    "user": "postgres",
-    "password": "postgres",
-    "host": "127.0.0.1",
-    "port": "5433" 
+
+SNOWFLAKE_CONFIG = {
+    "user": "GLORYDOGGZ",
+    "password": "WbP8d6qFeJnC6XU",
+    "account": "AHPROXW-DI24909",  # e.g., xy12345.us-east-1
+    "warehouse": "COMPUTE_WH",
+    "database": "NBA_MVP_DB",
+    "schema": "PUBLIC"
 }
 
 def get_connection():
-    return psycopg2.connect(**DB_PARAMS)
+    return snowflake.connector.connect(**SNOWFLAKE_CONFIG)
 
 
 def create_table():
     conn = get_connection()
     cur = conn.cursor()
 
-    # Fixed syntax: 'SERIAL' auto-increments, explicit DATA TYPES added, '%s' placeholders
+    # Snowflake syntax: Data types are upper-cased, table created in active schema
     cur.execute("""
-    CREATE TABLE IF NOT EXISTS mvp_rankings (
-        id SERIAL PRIMARY KEY,
-        run_id VARCHAR(50),
-        player_name VARCHAR(100),
-        mvp_score NUMERIC(10, 4),
-        run_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    CREATE TABLE IF NOT EXISTS MVP_RANKINGS (
+        RUN_ID VARCHAR(50),
+        PLAYER_NAME VARCHAR(100),
+        MVP_SCORE NUMBER(10, 4),
+        PTS NUMBER(5, 1),
+        REB NUMBER(5, 1),
+        AST NUMBER(5, 1),
+        RUN_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
     )
     """)
 
-    conn.commit()
     cur.close()
     conn.close()
 
 
-def insert_player(run_id, name, score, date):
+def insert_player(run_id, name, score, pts, reb, ast, date):
     conn = get_connection()
     cur = conn.cursor()
 
-    # Replaced '?' with Postgres '%s' syntax
-    cur.execute("""
-    INSERT INTO mvp_rankings (run_id, player_name, mvp_score, run_date)
-    VALUES (%s, %s, %s, %s)
-    """, (run_id, name, score, date))
+    # Uses standard %s placeholders for parameter binding
+    insert_query = """
+    INSERT INTO MVP_RANKINGS (RUN_ID, PLAYER_NAME, MVP_SCORE, PTS, REB, AST, RUN_DATE)
+    VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """
+    
+    cur.execute(insert_query, (run_id, name, score, pts, reb, ast, date))
 
-    conn.commit()
+    
     cur.close()
     conn.close()
 
 
-
-
 if __name__ == "__main__":
-    print("Creating table...")
+    print("Verifying Snowflake table structure...")
     create_table()
-    print("Table created successfully!")
+    print("Table verified successfully!")
 
     print("Inserting test record...")
-    insert_player("run_001", "Nikola Jokic", 98.5, "2026-08-21")
-    print("Record inserted successfully!")
+    insert_player("run_001", "Nikola Jokic", 98.5000, 26.4, 12.4, 9.0, "2026-08-29 12:00:00")
+    print("Record inserted successfully into Snowflake!")
