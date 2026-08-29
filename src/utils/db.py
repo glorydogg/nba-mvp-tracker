@@ -1,13 +1,16 @@
+import os
 import snowflake.connector
+from dotenv import load_dotenv
 
+load_dotenv()
 
 SNOWFLAKE_CONFIG = {
-    "user": "GLORYDOGGZ",
-    "password": "WbP8d6qFeJnC6XU",
-    "account": "AHPROXW-DI24909",  # e.g., xy12345.us-east-1
-    "warehouse": "COMPUTE_WH",
-    "database": "NBA_MVP_DB",
-    "schema": "PUBLIC"
+    "user": os.getenv("SNOWFLAKE_USER", "GLORYDOGGZ"),
+    "password": os.getenv("SNOWFLAKE_PASSWORD"),
+    "account": os.getenv("SNOWFLAKE_ACCOUNT", "AHPROXW-DI24909"),
+    "warehouse": os.getenv("SNOWFLAKE_WAREHOUSE", "COMPUTE_WH"),
+    "database": os.getenv("SNOWFLAKE_DATABASE", "NBA_MVP_DB"),
+    "schema": os.getenv("SNOWFLAKE_SCHEMA", "PUBLIC")
 }
 
 def get_connection():
@@ -18,9 +21,8 @@ def create_table():
     conn = get_connection()
     cur = conn.cursor()
 
-    # Snowflake syntax: Data types are upper-cased, table created in active schema
     cur.execute("""
-    CREATE TABLE IF NOT EXISTS MVP_RANKINGS (
+    CREATE TABLE IF NOT EXISTS NBA_MVP_DB.PUBLIC.MVP_RANKINGS (
         RUN_ID VARCHAR(50),
         PLAYER_NAME VARCHAR(100),
         MVP_SCORE NUMBER(10, 4),
@@ -59,6 +61,10 @@ if __name__ == "__main__":
     create_table()
     print("Table verified successfully!")
 
-    print("Inserting test record...")
-    insert_player("run_001", "Nikola Jokic", 98.5000, 26.4, 12.4, 9.0, "2026-08-29 12:00:00")
-    print("Record inserted successfully into Snowflake!")
+    print("Inserting batch test records...")
+    test_batch = [
+        ("run_test_001", "Nikola Jokić", 98.5000, "2026-08-29 12:00:00"),
+        ("run_test_001", "Shai Gilgeous-Alexander", 99.1000, "2026-08-29 12:00:00")
+    ]
+    insert_players_batch(test_batch)
+    print("Batch test records inserted successfully into Snowflake!")
