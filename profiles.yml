@@ -1,0 +1,15 @@
+dbt_nba:
+  outputs:
+    dev:
+      type: snowflake
+      account: AHPROXW-DI24909
+      user: GLORYDOGGZ
+      password: "WbP8d6qFeJnC6XU"
+      role: ACCOUNTADMIN
+      database: NBA_MVP_DB
+      warehouse: COMPUTE_WH
+      schema: PUBLIC
+      threads: 1
+      client_session_keep_alive: False
+      authenticator: externalbrowser
+  target: dev

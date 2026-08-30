@@ -1,21 +1,29 @@
 import os
+from pathlib import Path
 import snowflake.connector
 from dotenv import load_dotenv
 
-load_dotenv()
-
-SNOWFLAKE_CONFIG = {
-    "user": os.getenv("SNOWFLAKE_USER", "GLORYDOGGZ"),
-    "password": os.getenv("SNOWFLAKE_PASSWORD"),
-    "account": os.getenv("SNOWFLAKE_ACCOUNT", "AHPROXW-DI24909"),
-    "warehouse": os.getenv("SNOWFLAKE_WAREHOUSE", "COMPUTE_WH"),
-    "database": os.getenv("SNOWFLAKE_DATABASE", "NBA_MVP_DB"),
-    "schema": os.getenv("SNOWFLAKE_SCHEMA", "PUBLIC")
-}
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+env_path = BASE_DIR / ".env"
+load_dotenv(dotenv_path=env_path)
 
 def get_connection():
-    return snowflake.connector.connect(**SNOWFLAKE_CONFIG)
+    password = os.getenv("SNOWFLAKE_PASSWORD")
+    if not password:
+        raise ValueError(f"SNOWFLAKE_PASSWORD missing or empty in .env at {env_path}")
 
+    # Prompt terminal for the 6-digit code from Google Authenticator
+    mfa_code = input("Enter Google Authenticator 6-digit code: ")
+
+    return snowflake.connector.connect(
+        user=os.getenv("SNOWFLAKE_USER", "GLORYDOGGZ"),
+        password=password,
+        account=os.getenv("SNOWFLAKE_ACCOUNT", "AHPROXW-DI24909"),
+        warehouse=os.getenv("SNOWFLAKE_WAREHOUSE", "COMPUTE_WH"),
+        database=os.getenv("SNOWFLAKE_DATABASE", "NBA_MVP_DB"),
+        schema=os.getenv("SNOWFLAKE_SCHEMA", "PUBLIC"),
+        passcode=mfa_code
+    )
 
 def create_table():
     conn = get_connection()
@@ -26,9 +34,6 @@ def create_table():
         RUN_ID VARCHAR(50),
         PLAYER_NAME VARCHAR(100),
         MVP_SCORE NUMBER(10, 4),
-        PTS NUMBER(5, 1),
-        REB NUMBER(5, 1),
-        AST NUMBER(5, 1),
         RUN_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
     )
     """)
@@ -54,17 +59,3 @@ def insert_players_batch(players_data):
     conn.commit()
     cur.close()
     conn.close()
-
-
-if __name__ == "__main__":
-    print("Verifying Snowflake table structure...")
-    create_table()
-    print("Table verified successfully!")
-
-    print("Inserting batch test records...")
-    test_batch = [
-        ("run_test_001", "Nikola Jokić", 98.5000, "2026-08-29 12:00:00"),
-        ("run_test_001", "Shai Gilgeous-Alexander", 99.1000, "2026-08-29 12:00:00")
-    ]
-    insert_players_batch(test_batch)
-    print("Batch test records inserted successfully into Snowflake!")
